@@ -168,24 +168,45 @@ function triggerNotification(item) {
 }
 
 // Audio Beep Generator using Web Audio API (No external file needed)
+// Upgraded Audio Alert Engine (Plays a soft pleasant ringtone chime)
 function playBeepSound() {
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    
+    const ctx = new AudioContext();
 
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(880, ctx.currentTime); // Pitch (Hz)
-    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    // Notes sequence (Musical frequency in Hz for a soft bell ringtone)
+    // E5, G5, B5, E6 (Pleasant rising chime tone)
+    const notes = [659.25, 783.99, 987.77, 1318.51];
+    const duration = 0.18; // Duration of each note in seconds
 
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+    notes.forEach((freq, index) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
 
-    osc.start();
-    osc.stop(ctx.currentTime + 1); // 1-second chime
+      osc.type = 'sine'; // Smooth tone
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+      const startTime = ctx.currentTime + index * duration;
+      const stopTime = startTime + duration;
+
+      // Soft fading sound effect (Envelope)
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.2, startTime + 0.03); // Attack
+      gain.gain.exponentialRampToValueAtTime(0.001, stopTime);   // Decay
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(startTime);
+      osc.stop(stopTime);
+    });
+
   } catch (e) {
-    console.log('Audio Context error:', e);
+    console.log('Audio Context Error:', e);
   }
+}
 }
 
 function escapeHtml(str) {
