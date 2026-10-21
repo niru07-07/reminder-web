@@ -1,11 +1,29 @@
 // State Management
 let reminders = JSON.parse(localStorage.getItem('reminders')) || [];
+let audioCtx = null;
 
 // DOM Elements
 const reminderForm = document.getElementById('reminder-form');
 const reminderList = document.getElementById('reminder-list');
 const activeCount = document.getElementById('active-count');
 const notifyBtn = document.getElementById('notify-btn');
+
+// Unlock Browser Audio on First User Click/Tap
+function initAudio() {
+  if (!audioCtx) {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (AudioContext) {
+      audioCtx = new AudioContext();
+    }
+  }
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
+// Global click listener to unlock audio engine on mobile
+document.addEventListener('click', initAudio, { once: true });
+document.addEventListener('touchstart', initAudio, { once: true });
 
 // Initialize App
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,10 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Request Web Notifications Permission
 notifyBtn.addEventListener('click', () => {
+  initAudio();
   if ('Notification' in window) {
     Notification.requestPermission().then((permission) => {
       if (permission === 'granted') {
-        alert('Notifications enabled successfully!');
+        alert('Notifications & Audio alerts enabled successfully!');
         notifyBtn.style.display = 'none';
       } else {
         alert('Please allow notification access in browser settings.');
@@ -39,6 +58,7 @@ function checkNotificationPermission() {
 // Form Submit Handler
 reminderForm.addEventListener('submit', (e) => {
   e.preventDefault();
+  initAudio();
 
   const title = document.getElementById('title').value.trim();
   const category = document.getElementById('category').value;
@@ -61,6 +81,7 @@ reminderForm.addEventListener('submit', (e) => {
 
 // Quick Add Presets
 function quickAdd(title, minutesFromNow, category) {
+  initAudio();
   const targetTime = new Date(Date.now() + minutesFromNow * 60000).getTime();
 
   const newReminder = {
@@ -93,7 +114,6 @@ function renderReminders() {
     return;
   }
 
-  // Sort by time
   reminders.sort((a, b) => a.time - b.time);
 
   reminders.forEach((item) => {
@@ -127,13 +147,12 @@ function getCategoryIcon(cat) {
   }
 }
 
-// Local Storage Helper
 function saveAndRender() {
   localStorage.setItem('reminders', JSON.stringify(reminders));
   renderReminders();
 }
 
-// Alarm & Notification Interval Engine (Runs every 5 seconds)
+// Alarm & Notification Interval Engine (Runs every 3 seconds)
 function startReminderChecker() {
   setInterval(() => {
     const now = Date.now();
@@ -145,21 +164,20 @@ function startReminderChecker() {
       }
     });
 
-    // Clean up triggered alerts
     reminders = reminders.filter((item) => item.status === 'pending');
     saveAndRender();
-  }, 5000);
+  }, 3000);
 }
 
-// Trigger Web Push Notification & Sound Alert
+// Ringtone & Web Notification Trigger
 function triggerNotification(item) {
-  // 1. Play Audio Beep
-  playBeepSound();
+  // Play ringtone chime
+  playRingtoneChime();
 
-  // 2. Trigger Web Notification
+  // Show push notification
   if ('Notification' in window && Notification.permission === 'granted') {
-    new Notification(`Reminder: ${item.title}`, {
-      body: `Time to take care of your ${item.category.toLowerCase()} routine!`,
+    new Notification(`🔔 Reminder: ${item.title}`, {
+      body: `Time for your ${item.category.toLowerCase()} routine!`,
       icon: 'https://cdn-icons-png.flaticon.com/512/3602/3602145.png',
     });
   } else {
@@ -167,46 +185,41 @@ function triggerNotification(item) {
   }
 }
 
-// Audio Beep Generator using Web Audio API (No external file needed)
-// Upgraded Audio Alert Engine (Plays a soft pleasant ringtone chime)
-function playBeepSound() {
+// Loud 3-Beat Ringtone Chime
+function playRingtoneChime() {
   try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return;
-    
-    const ctx = new AudioContext();
+    initAudio();
+    if (!audioCtx) return;
 
-    // Notes sequence (Musical frequency in Hz for a soft bell ringtone)
-    // E5, G5, B5, E6 (Pleasant rising chime tone)
-    const notes = [659.25, 783.99, 987.77, 1318.51];
-    const duration = 0.18; // Duration of each note in seconds
+    // Repeats ringtone chime 3 times like a real ringtone
+    for (let r = 0; r < 3; r++) {
+      const delay = r * 0.6; // Repeat interval
+      const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6 (Bright ringtone melody)
 
-    notes.forEach((freq, index) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
+      notes.forEach((freq, index) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
 
-      osc.type = 'sine'; // Smooth tone
-      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        osc.type = 'triangle'; // Clear bell tone
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
 
-      const startTime = ctx.currentTime + index * duration;
-      const stopTime = startTime + duration;
+        const startTime = audioCtx.currentTime + delay + (index * 0.1);
+        const stopTime = startTime + 0.12;
 
-      // Soft fading sound effect (Envelope)
-      gain.gain.setValueAtTime(0, startTime);
-      gain.gain.linearRampToValueAtTime(0.2, startTime + 0.03); // Attack
-      gain.gain.exponentialRampToValueAtTime(0.001, stopTime);   // Decay
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(0.4, startTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, stopTime);
 
-      osc.connect(gain);
-      gain.connect(ctx.destination);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
 
-      osc.start(startTime);
-      osc.stop(stopTime);
-    });
-
+        osc.start(startTime);
+        osc.stop(stopTime);
+      });
+    }
   } catch (e) {
     console.log('Audio Context Error:', e);
   }
-}
 }
 
 function escapeHtml(str) {
