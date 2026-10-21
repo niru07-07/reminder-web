@@ -1,1 +1,100 @@
 # reminder-web
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Reminder - Stay on Track</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="navbar">
+    <div class="logo">
+      <i class="fa-solid fa-bell"></i> Reminder<span>Pro</span>
+    </div>
+    <button id="notify-btn" class="btn-secondary">
+      <i class="fa-solid fa-shield-halved"></i> Enable Notifications
+    </button>
+  </header>
+
+  <main class="container">
+    
+    <!-- Quick Action Presets -->
+    <section class="presets-card">
+      <h3>Quick Add Routine</h3>
+      <div class="preset-buttons">
+        <button class="preset-btn" onclick="quickAdd('Drink Water', 60, 'Water')">
+          <i class="fa-solid fa-glass-water"></i> Water (Every 1 hr)
+        </button>
+        <button class="preset-btn" onclick="quickAdd('Take Medicines', 480, 'Medicine')">
+          <i class="fa-solid fa-pills"></i> Medicine (Every 8 hrs)
+        </button>
+        <button class="preset-btn" onclick="quickAdd('Eye Rest Break', 20, 'Health')">
+          <i class="fa-solid fa-eye"></i> 20-20-20 Rule (20 mins)
+        </button>
+        <button class="preset-btn" onclick="quickAdd('Stretch & Walk', 120, 'Fitness')">
+          <i class="fa-solid fa-person-walking"></i> Walk (Every 2 hrs)
+        </button>
+      </div>
+    </section>
+
+    <!-- Custom Reminder Form -->
+    <section class="form-card">
+      <h3>Add Custom Reminder</h3>
+      <form id="reminder-form">
+        <div class="form-group">
+          <label for="title">Reminder Title</label>
+          <input type="text" id="title" placeholder="e.g., Take Vitamin D tablet" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category">
+              <option value="Water">💧 Water</option>
+              <option value="Medicine">💊 Medicine</option>
+              <option value="Health">🧘 Health & Fitness</option>
+              <option value="Work">💻 Work / Study</option>
+              <option value="General">🔔 General</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="reminder-time">Set Time</label>
+            <input type="datetime-local" id="reminder-time" required />
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary">
+          <i class="fa-solid fa-plus"></i> Set Reminder
+        </button>
+      </form>
+    </section>
+
+    <!-- Reminders List -->
+    <section class="list-card">
+      <div class="list-header">
+        <h3>Active Reminders</h3>
+        <span id="active-count" class="badge">0 Active</span>
+      </div>
+      <div id="reminder-list" class="reminder-list">
+        <!-- Dynamic items will be added here -->
+      </div>
+    </section>
+
+    <!-- Banner Ad Space for AdSense / Affiliate Monetization -->
+    <section class="ad-container">
+      <div class="ad-placeholder">
+        <p>💡 <em>Sponsored Deal:</em> Get up to 20% off health supplies on Netmeds & PharmEasy!</p>
+        <a href="#" target="_blank" class="ad-link">Shop Now</a>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
