@@ -277,3 +277,62 @@ input:focus, select:focus {
   color: #64748b;
   font-size: 0.85rem;
 }
+
+.guide-section {
+  max-width: 860px;
+  margin: 48px auto 24px;
+  padding: 28px 24px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  line-height: 1.7;
+  color: #1e293b;
+}
+
+.guide-section h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  color: #0f172a;
+}
+
+.guide-section h3 {
+  margin-top: 24px;
+  margin-bottom: 10px;
+  font-size: 1.15rem;
+  color: #0f172a;
+}
+
+.guide-section ul,
+.guide-section ol {
+  padding-left: 22px;
+  margin: 8px 0 16px;
+}
+
+.guide-section li {
+  margin-bottom: 8px;
+}
+
+.faq-item {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.faq-item h4 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.faq-item p {
+  margin: 0;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 600px) {
+  .guide-section {
+    margin: 32px 12px 16px;
+    padding: 20px 16px;
+  }
+}
